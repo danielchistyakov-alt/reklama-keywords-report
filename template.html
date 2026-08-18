@@ -249,7 +249,7 @@ footer{padding:34px 0 0;border-top:1px solid var(--hair);color:var(--faint);font
 <section>
   <p class="slabel">Динамика</p>
   <h2>Трафик растёт, вовлечение падает</h2>
-  <p class="lede">Три показателя по дням в одном масштабе каждый. Расхождение линий —
+  <p class="lede">Четыре показателя по дням, каждый в своём масштабе. Расхождение линий —
   главный сигнал периода.</p>
   <div class="spark3" id="sparks"></div>
 </section>
@@ -406,17 +406,21 @@ function spark(vals,dates){
    <path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2"
      stroke-linejoin="round" stroke-linecap="round"/>${dots}</svg>`;
 }
-const dts=D.days.map(d=>d.d.slice(8)+"."+d.d.slice(5,7));
+const dlab=rows=>rows.map(x=>x.d.slice(8)+"."+x.d.slice(5,7));
 const sparkDefs=[
  {t:"Визиты",k:"visits",d:"в день, всего "+nf(V)},
  {t:"Начали игру",k:"start",d:"в день, всего "+nf(GS)},
- {t:"Переходы на сайт Авито Рекламы",k:"clicks",d:"в день, всего "+nf(CL)}];
+ {t:"Переходы на сайт Авито Рекламы",k:"clicks",d:"в день, всего "+nf(CL)},
+ {t:"Регистрации кабинетов",k:"regs",src:D.cabinet.days,
+  d:"в день, всего "+nf(D.cabinet.totals.regs)}];
 document.getElementById("sparks").innerHTML=sparkDefs.map(s=>{
- const vals=D.days.map(x=>x[s.k]), first=vals[0], last=vals[vals.length-1];
- const dlt=first?Math.round((last-first)/first*100):0;
+ const rows=s.src||D.days;
+ const vals=rows.map(x=>x[s.k]), first=vals[0], last=vals[vals.length-1];
+ // на однозначных числах процент изменения — шум, показываем только абсолют
+ const dlt=first>=10?` · за период ${last>=first?"+":""}${Math.round((last-first)/first*100)}%`:"";
  return `<div class="sp"><div class="spt">${s.t}</div>
   <div class="spv">${nf(last)}</div>
-  <div class="spd">${s.d} · за период ${dlt>=0?"+":""}${dlt}%</div>${spark(vals,dts)}</div>`;}).join("");
+  <div class="spd">${s.d}${dlt}</div>${spark(vals,dlab(rows))}</div>`;}).join("");
 
 /* таблицы */
 const PILL={strong:["p-strong","сильный"],mid:["p-mid","средний"],weak:["p-weak","слабый"],
