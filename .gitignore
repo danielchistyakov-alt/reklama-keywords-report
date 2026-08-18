@@ -1,4 +1,12 @@
+# токен — никогда в репозиторий
 .env
+
+# результаты сборки, генерируются из Метрики
+dashboard.html
+dashboard_data.json
+data.json
+ads_cabinet_data.json
+_site/
+
 __pycache__/
 *.pyc
-_site/
