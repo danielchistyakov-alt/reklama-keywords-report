@@ -119,7 +119,21 @@ h2{font-size:23px;letter-spacing:-.014em;margin:0 0 8px;font-weight:620;text-wra
 .sp .spv{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums;
   font-size:22px;font-weight:600;letter-spacing:-.02em}
 .sp .spd{font-size:12px;color:var(--muted);margin-top:3px}
-.sp svg{display:block;width:100%;height:74px;margin-top:12px;overflow:visible}
+.spchart{position:relative;height:74px;margin-top:14px;cursor:crosshair;touch-action:none}
+.spchart svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.spdot{position:absolute;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;
+  background:var(--surface);border:2px solid var(--accent);pointer-events:none;
+  transition:transform .12s ease}
+.spdot.last{background:var(--accent)}
+.spchart.on .spdot{opacity:.45}
+.spchart.on .spdot.hit{opacity:1;transform:scale(1.6)}
+.spcross{position:absolute;top:-2px;bottom:0;width:1px;background:var(--accent);opacity:0;
+  pointer-events:none;transition:opacity .12s ease}
+.sptip{position:absolute;z-index:4;pointer-events:none;opacity:0;transition:opacity .12s ease;
+  background:var(--ink);color:var(--ground);border-radius:3px;padding:5px 9px;white-space:nowrap;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums;
+  font-size:11.5px;line-height:1.2;transform:translate(-50%,-150%)}
+.spchart.on .spcross,.spchart.on .sptip{opacity:1}
 
 /* --- таблицы --- */
 .tscroll{overflow-x:auto;border:1px solid var(--hair);border-radius:3px;background:var(--surface)}
@@ -391,20 +405,59 @@ document.getElementById("split").innerHTML=
    <div class="sn">страница продукта / личный кабинет</div></div>`;
 
 /* спарклайны */
-function spark(vals,dates){
- const w=280,h=74,mx=Math.max(...vals),mn=0;
- const X=i=>i/(vals.length-1)*w, Y=v=>h-(v-mn)/(mx-mn||1)*h;
+function spark(vals,labels){
+ const w=280,h=74,n=vals.length,mx=Math.max(...vals,1);
+ const X=i=>n>1?i/(n-1)*w:w/2, Y=v=>h-4-(v/mx)*(h-10);
  const pts=vals.map((v,i)=>[X(i),Y(v)]);
  const line=pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1)).join(" ");
  const area=line+` L ${w} ${h} L 0 ${h} Z`;
- const dots=pts.map((p,i)=>`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="${i===pts.length-1?4:2.5}"
-   fill="${i===pts.length-1?"var(--accent)":"var(--surface)"}" stroke="var(--accent)" stroke-width="2">
-   <title>${dates[i]}: ${nf(vals[i])}</title></circle>`).join("");
- return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img">
-   <line x1="0" y1="${h}" x2="${w}" y2="${h}" stroke="var(--hair)" stroke-width="1"/>
-   <path d="${area}" fill="var(--accent-soft)"/>
-   <path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2"
-     stroke-linejoin="round" stroke-linecap="round"/>${dots}</svg>`;
+ // точки рисуем HTML-элементами: SVG растягивается по ширине и сделал бы из них овалы
+ const dots=vals.map((v,i)=>`<i class="spdot${i===n-1?" last":""}" `+
+   `style="left:${(X(i)/w*100).toFixed(2)}%;top:${(Y(v)/h*100).toFixed(2)}%"></i>`).join("");
+ const alt=labels.map((l,i)=>`${l}: ${vals[i]}`).join(", ");
+ return `<div class="spchart" role="img" aria-label="${alt}"
+   data-vals="${vals.join(",")}" data-labels="${labels.join(",")}">
+   <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true">
+     <line x1="0" y1="${h}" x2="${w}" y2="${h}" stroke="var(--hair)" stroke-width="1"
+       vector-effect="non-scaling-stroke"/>
+     <path d="${area}" fill="var(--accent-soft)"/>
+     <path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2"
+       stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+   </svg><span class="spcross"></span>${dots}<span class="sptip"></span></div>`;
+}
+
+function armSparks(){
+ document.querySelectorAll(".spchart").forEach(ch=>{
+  const vals=ch.dataset.vals.split(",").map(Number);
+  const labels=ch.dataset.labels.split(",");
+  const dots=[...ch.querySelectorAll(".spdot")];
+  const cross=ch.querySelector(".spcross"), tip=ch.querySelector(".sptip");
+  const n=vals.length;
+  const show=e=>{
+   const r=ch.getBoundingClientRect();
+   const cx=e.touches?e.touches[0].clientX:e.clientX;
+   const f=Math.max(0,Math.min(1,(cx-r.left)/r.width));
+   const i=Math.round(f*(n-1)), left=n>1?i/(n-1)*100:50;
+   ch.classList.add("on");
+   dots.forEach((d,j)=>d.classList.toggle("hit",j===i));
+   cross.style.left=left+"%";
+   tip.style.top=dots[i].style.top;
+   tip.textContent=labels[i]+" · "+nf(vals[i]);
+   // прижимаем подсказку к границам графика по её фактической ширине
+   const tw=tip.offsetWidth;
+   const px=Math.max(tw/2, Math.min(r.width-tw/2, left/100*r.width));
+   tip.style.left=px+"px";
+   // у высоких точек подсказка налезала бы на подпись — разворачиваем её вниз
+   const up=parseFloat(dots[i].style.top)>=45;
+   tip.style.transform=up?"translate(-50%,-150%)":"translate(-50%,55%)";
+  };
+  const hide=()=>{ch.classList.remove("on");dots.forEach(d=>d.classList.remove("hit"));};
+  ch.addEventListener("mousemove",show);
+  ch.addEventListener("mouseleave",hide);
+  ch.addEventListener("touchstart",show,{passive:true});
+  ch.addEventListener("touchmove",show,{passive:true});
+  ch.addEventListener("touchend",hide);
+ });
 }
 const dlab=rows=>rows.map(x=>x.d.slice(8)+"."+x.d.slice(5,7));
 const sparkDefs=[
@@ -421,6 +474,7 @@ document.getElementById("sparks").innerHTML=sparkDefs.map(s=>{
  return `<div class="sp"><div class="spt">${s.t}</div>
   <div class="spv">${nf(last)}</div>
   <div class="spd">${s.d}${dlt}</div>${spark(vals,dlab(rows))}</div>`;}).join("");
+armSparks();
 
 /* таблицы */
 const PILL={strong:["p-strong","сильный"],mid:["p-mid","средний"],weak:["p-weak","слабый"],
