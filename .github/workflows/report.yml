@@ -9,24 +9,52 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  actions: write              # чтобы выключить себя после кампании
 
 concurrency:
   group: pages
   cancel-in-progress: false
 
+env:
+  FREEZE_AFTER: '2026-09-01'  # последний день, когда есть смысл пересобирать
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.gate.outputs.run }}
     steps:
+      - name: Проверить, не закончилась ли кампания
+        id: gate
+        run: |
+          TODAY=$(date -u +%F)
+          if [[ "$TODAY" > "$FREEZE_AFTER" && "${{ github.event_name }}" == "schedule" ]]; then
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "Кампания закончилась $FREEZE_AFTER, сегодня $TODAY."
+            echo "Отчёт заморожен на финальных числах, ежедневный запуск выключаю."
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Выключить ежедневный запуск
+        if: steps.gate.outputs.run == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow disable report.yml --repo ${{ github.repository }}
+
       - uses: actions/checkout@v4
+        if: steps.gate.outputs.run == 'true'
 
       - uses: actions/setup-python@v5
+        if: steps.gate.outputs.run == 'true'
         with:
           python-version: '3.12'
 
-      - run: pip install -r requirements.txt
+      - if: steps.gate.outputs.run == 'true'
+        run: pip install -r requirements.txt
 
       - name: Собрать отчёт из Метрики
+        if: steps.gate.outputs.run == 'true'
         env:
           METRIKA_TOKEN: ${{ secrets.METRIKA_TOKEN }}
         run: |
@@ -35,11 +63,13 @@ jobs:
           cp dashboard.html _site/index.html
 
       - uses: actions/upload-pages-artifact@v3
+        if: steps.gate.outputs.run == 'true'
         with:
           path: _site
 
   deploy:
     needs: build
+    if: needs.build.outputs.run == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
