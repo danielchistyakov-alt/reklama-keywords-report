@@ -157,14 +157,6 @@ code.inl{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5p
 .callout b{color:var(--ink)}
 .e2e-step .fbar{background:var(--good)}
 
-/* --- рекомендации --- */
-.recs{display:flex;flex-direction:column;gap:1px;background:var(--hair);
-  border:1px solid var(--hair);border-radius:3px;overflow:hidden}
-.rec{background:var(--surface);padding:20px 22px;display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start}
-.rmark{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;letter-spacing:.06em;
-  padding:4px 9px;border-radius:2px;white-space:nowrap;margin-top:2px}
-.rec h4{margin:0 0 6px;font-size:15.5px;font-weight:600;letter-spacing:-.008em}
-.rec p{margin:0;color:var(--muted);font-size:13.5px;max-width:70ch}
 
 /* --- сноски --- */
 .notes{color:var(--muted);font-size:13px;max-width:72ch}
@@ -277,11 +269,6 @@ footer{padding:34px 0 0;border-top:1px solid var(--hair);color:var(--faint);font
   <div class="tscroll"><table id="tcamp"></table></div>
 </section>
 
-<section>
-  <p class="slabel">Решения</p>
-  <h2>Что имеет смысл сделать до 31 августа</h2>
-  <div class="recs" id="recs"></div>
-</section>
 
 <section>
   <div class="notes">
@@ -493,41 +480,6 @@ document.getElementById("tpages").innerHTML=
    <td class="barcell"><i style="width:${(p.visits/pmax*100).toFixed(1)}%"></i><b>${nf(p.visits)}</b></td>
    <td>${nf(p.regs)}</td><td>${f2(p.cr)}%</td></tr>`).join("")}</tbody>`;
 
-/* рекомендации */
-const U=Object.fromEntries(D.by_utm.map(r=>[r.name,r]));
-const waste=D.by_utm.filter(r=>r.v==="waste");
-const wV=waste.reduce((a,b)=>a+b.visits,0), wC=waste.reduce((a,b)=>a+b.clicks,0);
-const recs=[
- {m:"проверить",c:"p-anomaly",h:"Разобраться с mts — цифры не сходятся",
-  p:`${nf(U.mts.visits)} визитов, ${nf(U.mts.clicks)} переходов (${f1(U.mts.cr)}% — лучший CR в закупке)
-     и при этом ровно ноль дошедших до первого уровня игры. Такое сочетание не выглядит как обычное
-     поведение людей. До выяснения я бы не считал этот источник успехом и не масштабировал его.`},
- {m:"отключить",c:"p-waste",h:"Снять soloway и sberseller",
-  p:`${nf(wV)} визитов дали ${nf(wC)} переходов при отказах выше 75% и среднем времени около 10 секунд.
-     Это не аудитория спецпроекта. Бюджет освободится на две недели откруток.`},
- {m:"перелить",c:"p-mid",h:"Сдвинуть бюджет в сторону avito_pro и телеграм-каналов",
-  p:`avito_pro: ${nf(U.avito_pro.visits)} визитов, вовлечение ${f1(U.avito_pro.engage)}%, CR ${f1(U.avito_pro.cr)}%.
-     telegram: ${nf(U.telegram.visits)} визитов, вовлечение ${f1(U.telegram.engage)}%, CR ${f1(U.telegram.cr)}%.
-     На фоне yandex с его ${f2(U.yandex.cr)}% это несопоставимые по качеству каналы — но объём у них крошечный.`},
- {m:"починить",c:"p-mid",h:"Поднять заметность игры на первом экране",
-  p:`«Играть» нажимают ${f1(pc(D.funnel[0].v,V))}% визитов, и ещё почти половина из них отваливается,
-     не закончив первый уровень. Это самая дорогая точка потерь во всей воронке — дешевле поправить
-     первый экран, чем докупать трафик.`},
- {m:"разметить",c:"p-weak",h:"Закрыть дыру с логотипом",
-  p:`Логотип в шапке ведёт на avito.ru/ads, но целью не размечен. Сколько переходов уходит мимо
-     отчёта — сейчас неизвестно. Правится в GTM за один тег.`},
- {m:"проверить",c:"p-anomaly",h:"Посмотреть, куда ведёт кнопка в личный кабинет",
-  p:`${nf(D.cabinet.groups.filter(g=>/Экран входа/.test(g.name))[0].visits)} визитов приземляются на
-     экран входа и дают 3 регистрации. Там, где человек попадает сразу в кабинет или на форму
-     регистрации, конверсия 18–27%. Часть попавших на вход — действующие клиенты, для них это
-     нормально, но объём такой, что маршрутизацию стоит перепроверить.`},
- {m:"разметить",c:"p-mid",h:"Пробросить исходный utm_source в исходящие ссылки",
-  p:`Сейчас все ${nf(D.cabinet.totals.regs)} регистраций лежат одной кучей — какой канал их принёс,
-     по данным не восстановить. Если добавить в ссылки на avito.ru/ads исходную метку, на финале
-     можно будет считать стоимость регистрации по каналам, а не в среднем по проекту.`}];
-document.getElementById("recs").innerHTML=recs.map(r=>
- `<div class="rec"><span class="rmark pill ${r.c}">${r.m}</span>
-   <div><h4>${r.h}</h4><p>${r.p}</p></div></div>`).join("");
 
 document.getElementById("foot").textContent=
  `Источник: Яндекс.Метрика, счётчик 111451917. Данные за ${D.period.from} – ${D.period.to} ${new Date().getFullYear()} г. `+
