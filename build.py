@@ -290,7 +290,7 @@ def main():
           f"регистрации={d['cabinet']['totals']['regs']:,.0f}")
 
     d["e2e"] = [{"l": "Визиты на спецпроекте", "v": d["kpi"]["visits"]},
-                {"l": "Кликнули на Авито Рекламу", "v": d["clicks"]["any"]},
+                {"l": "Кликнули на сайт Авито Рекламы", "v": d["clicks"]["any"]},
                 {"l": "Доехали до сайта", "v": d["cabinet"]["totals"]["visits"]},
                 {"l": "Зарегистрировали кабинет", "v": d["cabinet"]["totals"]["regs"]}]
     d["built"] = date.today().isoformat()

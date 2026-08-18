@@ -67,7 +67,7 @@ h2{font-size:23px;letter-spacing:-.014em;margin:0 0 8px;font-weight:620;text-wra
   margin:36px 0 0}
 .kpi{background:var(--surface);padding:20px 20px 18px;box-shadow:0 0 0 1px var(--hair)}
 .kpi .k{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;letter-spacing:.1em;
-  text-transform:uppercase;color:var(--faint);margin-bottom:10px}
+  text-transform:uppercase;color:var(--faint);margin-bottom:10px;min-height:3.1em}
 .kpi .v{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums;
   font-size:31px;line-height:1;letter-spacing:-.03em;font-weight:600}
 .kpi .n{font-size:12.5px;color:var(--muted);margin-top:8px}
@@ -191,7 +191,7 @@ footer{padding:34px 0 0;border-top:1px solid var(--hair);color:var(--faint);font
   <p class="eyebrow">Спецпроект · Авито Реклама · Метрика 111451917</p>
   <h1>Ключевые слова: что показал первый срез</h1>
   <p class="sub">Мини-игра на reklama-keywords.ru. Отчёт по источникам трафика и двум группам
-  событий — прохождению игры и переходам на Авито Рекламу. Доведён до регистраций
+  событий — прохождению игры и переходам на сайт Авито Рекламы. Доведён до регистраций
   в рекламном кабинете.</p>
   <div class="periodbar" id="periodbar"></div>
 </header>
@@ -199,7 +199,7 @@ footer{padding:34px 0 0;border-top:1px solid var(--hair);color:var(--faint);font
 <section>
   <p class="slabel">Итоги периода</p>
   <h2>Четыре числа</h2>
-  <p class="lede">Переходы на Авито Рекламу посчитаны по уникальным визитам: один человек часто
+  <p class="lede">Переходы на сайт Авито Рекламы посчитаны по уникальным визитам: один человек часто
   жмёт две-три кнопки, и простая сумма целей завысила бы результат на четверть.</p>
   <div class="kpis" id="kpis"></div>
 </section>
@@ -289,7 +289,7 @@ footer{padding:34px 0 0;border-top:1px solid var(--hair);color:var(--faint);font
     <ul>
       <li>Атрибуция — последний значимый переход, одинаково во всех разрезах.</li>
       <li>Конверсии считаются по визитам, охват — по посетителям; в одной колонке они не смешиваются.</li>
-      <li>Переходы на Рекламу — уникальные визиты, где достигнута хотя бы одна из шести целей-кнопок
+      <li>Переходы на сайт Авито Рекламы — уникальные визиты, где достигнута хотя бы одна из шести целей-кнопок
       (OR-сегмент), а не сумма достижений.</li>
       <li>«Интерес» — кнопки на <code>ads.avito.com/keywords</code>. «Намерение» — кнопки на
       <code>avito.ru/ads/lk</code>. Сумма двух групп больше общего числа, потому что часть визитов
@@ -338,7 +338,7 @@ document.getElementById("periodbar").innerHTML=
 const kp=[
  {k:"Визиты",v:nf(V),n:nf(D.kpi.users)+" посетителей · отказов "+f1(D.kpi.bounce)+"% · "+Math.round(D.kpi.dur)+" с"},
  {k:"Начали игру",v:nf(GS),n:f2(pc(GS,V))+"% от визитов · прошли до конца "+nf(GF)},
- {k:"Переходы на Рекламу",v:nf(CL),n:f2(pc(CL,V))+"% от визитов · уникальные визиты"},
+ {k:"Переходы на сайт Авито Рекламы",v:nf(CL),n:f2(pc(CL,V))+"% от визитов · уникальные визиты"},
  {k:"Регистраций кабинета",v:nf(D.cabinet.totals.regs),
   n:f2(pc(D.cabinet.totals.regs,V))+"% от визитов спецпроекта",hl:1}];
 document.getElementById("kpis").append(...kp.map(o=>{
@@ -349,7 +349,7 @@ document.getElementById("kpis").append(...kp.map(o=>{
 const crGame=pc(D.clicks.after_game,GS), crRest=pc(D.clicks.no_game,V-GS);
 document.getElementById("verdict").innerHTML=
  `<h3>Кто доиграл — конвертится в ${Math.round(crGame/crRest)} раз лучше. Но доигрывает 1 из 100</h3>
-  <p>Из тех, кто дошёл хотя бы до конца первого уровня, на Авито Рекламу перешли
+  <p>Из тех, кто дошёл хотя бы до конца первого уровня, на сайт Авито Рекламы перешли
   <span class="big">${f1(crGame)}%</span>. Среди всех остальных — <span class="big">${f2(crRest)}%</span>.
   Механика делает ровно то, ради чего её строили: человек, который поиграл в подбор ключевых слов,
   идёт смотреть продукт.</p>
@@ -357,7 +357,7 @@ document.getElementById("verdict").innerHTML=
   визитов, а до конца первого уровня дошли <span class="big">${f2(pc(GS,V))}%</span>. То есть
   ${nf(V-D.funnel[0].v)} человек ушли, ни разу не притронувшись к игре. Основные потери — не внутри
   механики, а на первом экране и в качестве закупленного трафика.</p>
-  <p>При этом ${nf(D.clicks.no_game)} из ${nf(CL)} переходов на Рекламу
+  <p>При этом ${nf(D.clicks.no_game)} из ${nf(CL)} переходов на сайт Авито Рекламы
   (${Math.round(pc(D.clicks.no_game,CL))}%) сделали люди, которые игру не начинали. Лендинг работает
   и сам по себе — игра усиливает, но не является единственным путём к цели.</p>`;
 
@@ -377,11 +377,11 @@ document.getElementById("funnel").append(...D.funnel.map((s,i)=>{
 
 /* сравнение */
 document.getElementById("split").innerHTML=
- `<div class="scard win"><div class="st">Начали игру → перешли на Рекламу</div>
+ `<div class="scard win"><div class="st">Начали игру → перешли на сайт Авито Рекламы</div>
    <div class="sv">${f1(crGame)}%</div>
    <div class="gauge"><i style="width:${crGame}%"></i></div>
    <div class="sn">${nf(D.clicks.after_game)} переходов из ${nf(GS)} визитов</div></div>
-  <div class="scard"><div class="st">Не начинали игру → перешли на Рекламу</div>
+  <div class="scard"><div class="st">Не начинали игру → перешли на сайт Авито Рекламы</div>
    <div class="sv">${f2(crRest)}%</div>
    <div class="gauge"><i style="width:${crRest}%"></i></div>
    <div class="sn">${nf(D.clicks.no_game)} переходов из ${nf(V-GS)} визитов</div></div>
@@ -410,7 +410,7 @@ const dts=D.days.map(d=>d.d.slice(8)+"."+d.d.slice(5,7));
 const sparkDefs=[
  {t:"Визиты",k:"visits",d:"в день, всего "+nf(V)},
  {t:"Начали игру",k:"start",d:"в день, всего "+nf(GS)},
- {t:"Переходы на Рекламу",k:"clicks",d:"в день, всего "+nf(CL)}];
+ {t:"Переходы на сайт Авито Рекламы",k:"clicks",d:"в день, всего "+nf(CL)}];
 document.getElementById("sparks").innerHTML=sparkDefs.map(s=>{
  const vals=D.days.map(x=>x[s.k]), first=vals[0], last=vals[vals.length-1];
  const dlt=first?Math.round((last-first)/first*100):0;
