@@ -1,0 +1,536 @@
+<title>Спецпроект «Ключевые слова»</title>
+<style>
+:root{
+  --ground:#F7F9FA; --surface:#FFFFFF; --surface-2:#F1F5F7;
+  --ink:#0E1A20; --ink-2:#33454F; --muted:#5B6F7B; --faint:#8CA0AB;
+  --hair:#E3E9ED; --hair-2:#EDF2F4;
+  --accent:#0B7C9E; --accent-soft:rgba(11,124,158,.10); --accent-mid:rgba(11,124,158,.22);
+  --good:#0C7C5A; --good-bg:rgba(12,124,90,.10);
+  --warn:#B4830B; --warn-bg:rgba(180,131,11,.12);
+  --crit:#A8322A; --crit-bg:rgba(168,50,42,.10);
+  --shadow:0 1px 2px rgba(14,26,32,.05), 0 8px 24px -16px rgba(14,26,32,.18);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0C1317; --surface:#121B21; --surface-2:#18242B;
+    --ink:#E6EEF2; --ink-2:#C3D2DA; --muted:#8DA1AD; --faint:#6B7F8B;
+    --hair:#1F2C34; --hair-2:#182329;
+    --accent:#2AA3C4; --accent-soft:rgba(42,163,196,.14); --accent-mid:rgba(42,163,196,.28);
+    --good:#14A07C; --good-bg:rgba(20,160,124,.15);
+    --warn:#B0900E; --warn-bg:rgba(176,144,14,.18);
+    --crit:#D45368; --crit-bg:rgba(212,83,104,.15);
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0C1317; --surface:#121B21; --surface-2:#18242B;
+  --ink:#E6EEF2; --ink-2:#C3D2DA; --muted:#8DA1AD; --faint:#6B7F8B;
+  --hair:#1F2C34; --hair-2:#182329;
+  --accent:#2AA3C4; --accent-soft:rgba(42,163,196,.14); --accent-mid:rgba(42,163,196,.28);
+  --good:#14A07C; --good-bg:rgba(20,160,124,.15);
+  --warn:#B0900E; --warn-bg:rgba(176,144,14,.18);
+  --crit:#D45368; --crit-bg:rgba(212,83,104,.15);
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.6);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased;
+}
+.mono{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px 96px}
+
+/* --- шапка --- */
+header{padding:56px 0 36px;border-bottom:1px solid var(--hair)}
+.eyebrow{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--faint);margin:0 0 14px}
+h1{font-size:clamp(30px,5vw,44px);line-height:1.08;letter-spacing:-.022em;margin:0 0 14px;
+  font-weight:640;text-wrap:balance}
+.sub{color:var(--muted);max-width:62ch;margin:0;font-size:16px}
+.periodbar{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.chip{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;letter-spacing:.03em;
+  padding:5px 10px;border:1px solid var(--hair);border-radius:2px;color:var(--muted);background:var(--surface)}
+.chip strong{color:var(--ink);font-weight:600}
+
+/* --- секции --- */
+section{padding:44px 0;border-bottom:1px solid var(--hair)}
+section:last-of-type{border-bottom:0}
+.slabel{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--faint);margin:0 0 8px}
+h2{font-size:23px;letter-spacing:-.014em;margin:0 0 8px;font-weight:620;text-wrap:balance}
+.lede{color:var(--muted);margin:0 0 26px;max-width:66ch}
+
+/* --- KPI --- */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1px;
+  margin:36px 0 0}
+.kpi{background:var(--surface);padding:20px 20px 18px;box-shadow:0 0 0 1px var(--hair)}
+.kpi .k{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--faint);margin-bottom:10px}
+.kpi .v{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums;
+  font-size:31px;line-height:1;letter-spacing:-.03em;font-weight:600}
+.kpi .n{font-size:12.5px;color:var(--muted);margin-top:8px}
+.kpi.hl .v{color:var(--accent)}
+
+/* --- вердикт --- */
+.verdict{background:var(--surface);border:1px solid var(--hair);border-left:2px solid var(--accent);
+  border-radius:3px;padding:26px 28px;box-shadow:var(--shadow)}
+.verdict h3{margin:0 0 12px;font-size:19px;letter-spacing:-.012em;font-weight:620}
+.verdict p{margin:0 0 12px;color:var(--ink-2);max-width:70ch}
+.verdict p:last-child{margin-bottom:0}
+.big{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums;
+  font-weight:640;color:var(--accent)}
+
+/* --- воронка --- */
+.funnel{display:flex;flex-direction:column;gap:2px}
+.fstep{display:grid;grid-template-columns:186px 1fr 108px;align-items:center;gap:14px;
+  padding:7px 0;border-radius:2px}
+.fstep .fl{font-size:13.5px;color:var(--ink-2)}
+.fstep.kpi-step .fl{color:var(--ink);font-weight:600}
+.ftrack{background:var(--surface-2);border-radius:2px;height:26px;position:relative;overflow:hidden}
+.fbar{height:100%;background:var(--accent);border-radius:0 3px 3px 0;transition:width .5s cubic-bezier(.2,.7,.3,1)}
+.fnum{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums;
+  font-size:13px;text-align:right;color:var(--ink)}
+.fnum span{color:var(--faint);font-size:11.5px;display:block;margin-top:1px}
+.fstep.kpi-step{background:var(--accent-soft)}
+.fstep.kpi-step .ftrack{background:var(--surface)}
+.ftag{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:9.5px;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--accent);white-space:nowrap;display:block;margin-top:2px}
+
+/* --- сравнение --- */
+.split{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.scard{background:var(--surface);border:1px solid var(--hair);border-radius:3px;padding:22px}
+.scard .st{font-size:13.5px;color:var(--muted);margin-bottom:14px}
+.scard .sv{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums;
+  font-size:40px;line-height:1;letter-spacing:-.03em;font-weight:640}
+.scard .sn{font-size:12.5px;color:var(--faint);margin-top:10px}
+.scard.win{border-color:var(--accent-mid)}
+.scard.win .sv{color:var(--accent)}
+.gauge{height:5px;background:var(--surface-2);border-radius:3px;margin-top:16px;overflow:hidden}
+.gauge i{display:block;height:100%;background:var(--accent);border-radius:3px}
+.scard:not(.win) .gauge i{background:var(--faint)}
+
+/* --- спарклайны --- */
+.spark3{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+.sp{background:var(--surface);border:1px solid var(--hair);border-radius:3px;padding:18px 18px 10px}
+.sp .spt{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--faint);margin-bottom:6px}
+.sp .spv{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums;
+  font-size:22px;font-weight:600;letter-spacing:-.02em}
+.sp .spd{font-size:12px;color:var(--muted);margin-top:3px}
+.sp svg{display:block;width:100%;height:74px;margin-top:12px;overflow:visible}
+
+/* --- таблицы --- */
+.tscroll{overflow-x:auto;border:1px solid var(--hair);border-radius:3px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:660px}
+th{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--faint);font-weight:500;text-align:right;
+  padding:12px 11px;border-bottom:1px solid var(--hair);white-space:nowrap;background:var(--surface-2)}
+th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:var(--surface-2);
+  box-shadow:1px 0 0 var(--hair)}
+td:first-child{background:var(--surface)}
+td{padding:10px 11px;border-bottom:1px solid var(--hair-2);text-align:right;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:var(--surface-2)}
+td.nm{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-weight:520}
+.pill{display:inline-flex;align-items:center;gap:5px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:10.5px;letter-spacing:.05em;padding:3px 8px;border-radius:2px;white-space:nowrap}
+.pill::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor;flex:none}
+.p-strong{color:var(--good);background:var(--good-bg)}
+.p-mid{color:var(--accent);background:var(--accent-soft)}
+.p-weak{color:var(--muted);background:var(--surface-2)}
+.p-waste{color:var(--crit);background:var(--crit-bg)}
+.p-anomaly{color:var(--warn);background:var(--warn-bg)}
+.p-test{color:var(--faint);background:var(--surface-2)}
+.barcell{position:relative}
+.barcell i{position:absolute;left:0;top:50%;transform:translateY(-50%);height:15px;
+  background:var(--accent-soft);border-radius:1px;z-index:0}
+.barcell b{position:relative;z-index:1;font-weight:500}
+
+/* --- блок кабинета --- */
+code.inl{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;
+  background:var(--surface-2);padding:1px 5px;border-radius:2px;color:var(--ink-2)}
+.callout{margin-top:16px;background:var(--warn-bg);border-left:2px solid var(--warn);
+  border-radius:2px;padding:16px 18px;font-size:13.5px;color:var(--ink-2)}
+.callout b{color:var(--ink)}
+.e2e-step .fbar{background:var(--good)}
+
+/* --- рекомендации --- */
+.recs{display:flex;flex-direction:column;gap:1px;background:var(--hair);
+  border:1px solid var(--hair);border-radius:3px;overflow:hidden}
+.rec{background:var(--surface);padding:20px 22px;display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start}
+.rmark{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;letter-spacing:.06em;
+  padding:4px 9px;border-radius:2px;white-space:nowrap;margin-top:2px}
+.rec h4{margin:0 0 6px;font-size:15.5px;font-weight:600;letter-spacing:-.008em}
+.rec p{margin:0;color:var(--muted);font-size:13.5px;max-width:70ch}
+
+/* --- сноски --- */
+.notes{color:var(--muted);font-size:13px;max-width:72ch}
+.notes h3{font-size:14px;color:var(--ink);margin:0 0 10px;font-weight:600}
+.notes ul{margin:0;padding-left:18px}
+.notes li{margin-bottom:7px}
+.notes code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;
+  background:var(--surface-2);padding:1px 5px;border-radius:2px;color:var(--ink-2)}
+footer{padding:34px 0 0;border-top:1px solid var(--hair);color:var(--faint);font-size:12.5px}
+
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media (max-width:640px){
+  .fstep{grid-template-columns:1fr;gap:4px}
+  .fstep .ftrack{height:20px}
+  .fnum{text-align:left}
+  header{padding:36px 0 28px}
+}
+</style>
+
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">Спецпроект · Авито Реклама · Метрика 111451917</p>
+  <h1>Ключевые слова: что показал первый срез</h1>
+  <p class="sub">Мини-игра на reklama-keywords.ru. Отчёт по источникам трафика и двум группам
+  событий — прохождению игры и переходам на Авито Рекламу. Доведён до регистраций
+  в рекламном кабинете.</p>
+  <div class="periodbar" id="periodbar"></div>
+</header>
+
+<section>
+  <p class="slabel">Итоги периода</p>
+  <h2>Четыре числа</h2>
+  <p class="lede">Переходы на Авито Рекламу посчитаны по уникальным визитам: один человек часто
+  жмёт две-три кнопки, и простая сумма целей завысила бы результат на четверть.</p>
+  <div class="kpis" id="kpis"></div>
+</section>
+
+<section>
+  <p class="slabel">Главное</p>
+  <h2>Игра работает. До неё не доходят</h2>
+  <div class="verdict" id="verdict"></div>
+</section>
+
+<section>
+  <p class="slabel">Группа событий 1</p>
+  <h2>Воронка мини-игры</h2>
+  <p class="lede">Семь шагов вместо двух — видно, где именно теряются люди.
+  Подсвечены две контрольные точки из задачи.</p>
+  <div class="funnel" id="funnel"></div>
+</section>
+
+<section>
+  <p class="slabel">Группа событий 2</p>
+  <h2>Кто доходит до Авито Рекламы</h2>
+  <p class="lede">Сравнение конверсии в переход у тех, кто начал игру, и у всех остальных.</p>
+  <div class="split" id="split"></div>
+</section>
+
+<section>
+  <p class="slabel">Результат · счётчик Авито Рекламы 101840084</p>
+  <h2>Что было дальше: регистрации кабинетов</h2>
+  <p class="lede">Данные с принимающей стороны. Трафик спецпроекта опознан по метке
+  <code class="inl">utm_source=landing_ads</code> и по параметру
+  <code class="inl">from=ads_special_keywords</code> в адресе входа; регистрация — цель
+  «Успешная регистрация».</p>
+  <div class="kpis" id="cabkpi"></div>
+  <div class="e2ewrap">
+    <p class="slabel" style="margin:34px 0 12px">Сквозная воронка</p>
+    <div class="funnel" id="e2e"></div>
+  </div>
+  <p class="slabel" style="margin:38px 0 12px">Куда попадают люди</p>
+  <p class="lede">Страницы входа сгруппированы по смыслу. Разброс конверсии между группами —
+  главное, что видно в этих данных.</p>
+  <div class="tscroll"><table id="tland"></table></div>
+  <div class="callout" id="landnote"></div>
+  <p class="slabel" style="margin:38px 0 12px">Все страницы входа</p>
+  <div class="tscroll"><table id="tpages"></table></div>
+</section>
+
+<section>
+  <p class="slabel">Динамика</p>
+  <h2>Трафик растёт, вовлечение падает</h2>
+  <p class="lede">Три показателя по дням в одном масштабе каждый. Расхождение линий —
+  главный сигнал периода.</p>
+  <div class="spark3" id="sparks"></div>
+</section>
+
+<section>
+  <p class="slabel">Источники · разрез 1</p>
+  <h2>UTM-метки</h2>
+  <p class="lede">Отсортировано по объёму. «Вовлечение» — доля визитов, дошедших до первого
+  уровня игры; «переходы» — уникальные визиты с кликом на avito.ru/ads или ads.avito.com.</p>
+  <div class="tscroll"><table id="tutm"></table></div>
+</section>
+
+<section>
+  <p class="slabel">Источники · разрез 2</p>
+  <h2>Типы трафика</h2>
+  <p class="lede">Стандартная классификация Метрики. Разрез не дублирует UTM, а перекрывает
+  весь трафик, включая неразмеченный.</p>
+  <div class="tscroll"><table id="ttraf"></table></div>
+</section>
+
+<section>
+  <p class="slabel">Детализация</p>
+  <h2>Кампании</h2>
+  <p class="lede">Топ-14 по объёму, с качеством трафика.</p>
+  <div class="tscroll"><table id="tcamp"></table></div>
+</section>
+
+<section>
+  <p class="slabel">Решения</p>
+  <h2>Что имеет смысл сделать до 31 августа</h2>
+  <div class="recs" id="recs"></div>
+</section>
+
+<section>
+  <div class="notes">
+    <h3>Методика и оговорки</h3>
+    <ul>
+      <li>Атрибуция — последний значимый переход, одинаково во всех разрезах.</li>
+      <li>Конверсии считаются по визитам, охват — по посетителям; в одной колонке они не смешиваются.</li>
+      <li>Переходы на Рекламу — уникальные визиты, где достигнута хотя бы одна из шести целей-кнопок
+      (OR-сегмент), а не сумма достижений.</li>
+      <li>«Интерес» — кнопки на <code>ads.avito.com/keywords</code>. «Намерение» — кнопки на
+      <code>avito.ru/ads/lk</code>. Сумма двух групп больше общего числа, потому что часть визитов
+      попадает в обе.</li>
+      <li>Клик по логотипу в шапке ведёт на <code>www.avito.ru/ads</code>, но целью не размечен —
+      эти переходы в отчёт не попадают и сейчас теряются.</li>
+      <li>Внутренние тестовые метки (<code>test</code>, <code>testa</code>, <code>testa1</code>,
+      <code>testa2</code>) из таблицы источников исключены — 190 визитов и 6 переходов, 0,3% объёма.
+      В итоговых числах сверху они остались, чтобы сходиться с интерфейсом Метрики.</li>
+      <li>Регистрации взяты из счётчика Авито Рекламы 101840084, цель 513361195 «Успешная
+      регистрация». Трафик спецпроекта опознан по <code>utm_source=landing_ads</code> и по
+      <code>from=ads_special_keywords</code> в адресе входа.</li>
+      <li>Разрыв между 1&nbsp;925 кликами и 1&nbsp;424 визитами на принимающей стороне —
+      обычные потери на переходе: недогруженные страницы, блокировщики, потеря параметров.
+      Отдельно этот разрыв не разбирался.</li>
+      <li>Понять, какой рекламный канал принёс каждую регистрацию, сейчас нельзя: исходящие ссылки
+      не пробрасывают исходный <code>utm_source</code> спецпроекта. Деньги считаются только
+      суммарно по проекту.</li>
+      <li>Спенд и пополнения в отчёт не входят — только факт регистрации кабинета.</li>
+    </ul>
+  </div>
+  <footer id="foot"></footer>
+</section>
+
+</div>
+
+<script id="payload" type="application/json">__DATA__</script>
+<script>
+(function(){
+const D=JSON.parse(document.getElementById("payload").textContent);
+const nf=n=>n.toLocaleString("ru-RU");
+const pc=(a,b)=>b?(a/b*100):0;
+const f1=n=>n.toFixed(1).replace(".",",");
+const f2=n=>n.toFixed(2).replace(".",",");
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e};
+
+const V=D.kpi.visits, CL=D.clicks.any, GS=D.game_started, GF=D.game_finished;
+
+/* шапка */
+document.getElementById("periodbar").innerHTML=
+ `<span class="chip">Период <strong>${D.period.from} – ${D.period.to}</strong></span>`+
+ `<span class="chip">Кампания до <strong>${D.period.full_to}</strong></span>`+
+ `<span class="chip">Промежуточный срез · данные ещё копятся</span>`;
+
+/* KPI */
+const kp=[
+ {k:"Визиты",v:nf(V),n:nf(D.kpi.users)+" посетителей · отказов "+f1(D.kpi.bounce)+"% · "+Math.round(D.kpi.dur)+" с"},
+ {k:"Начали игру",v:nf(GS),n:f2(pc(GS,V))+"% от визитов · прошли до конца "+nf(GF)},
+ {k:"Переходы на Рекламу",v:nf(CL),n:f2(pc(CL,V))+"% от визитов · уникальные визиты"},
+ {k:"Регистраций кабинета",v:nf(D.cabinet.totals.regs),
+  n:f2(pc(D.cabinet.totals.regs,V))+"% от визитов спецпроекта",hl:1}];
+document.getElementById("kpis").append(...kp.map(o=>{
+ const d=el("div","kpi"+(o.hl?" hl":""));
+ d.append(el("div","k",o.k),el("div","v",o.v),el("div","n",o.n));return d;}));
+
+/* вердикт */
+const crGame=pc(D.clicks.after_game,GS), crRest=pc(D.clicks.no_game,V-GS);
+document.getElementById("verdict").innerHTML=
+ `<h3>Кто доиграл — конвертится в ${Math.round(crGame/crRest)} раз лучше. Но доигрывает 1 из 100</h3>
+  <p>Из тех, кто дошёл хотя бы до конца первого уровня, на Авито Рекламу перешли
+  <span class="big">${f1(crGame)}%</span>. Среди всех остальных — <span class="big">${f2(crRest)}%</span>.
+  Механика делает ровно то, ради чего её строили: человек, который поиграл в подбор ключевых слов,
+  идёт смотреть продукт.</p>
+  <p>Проблема в другом месте. Кнопку «Играть» нажали <span class="big">${f1(pc(D.funnel[0].v,V))}%</span>
+  визитов, а до конца первого уровня дошли <span class="big">${f2(pc(GS,V))}%</span>. То есть
+  ${nf(V-D.funnel[0].v)} человек ушли, ни разу не притронувшись к игре. Основные потери — не внутри
+  механики, а на первом экране и в качестве закупленного трафика.</p>
+  <p>При этом ${nf(D.clicks.no_game)} из ${nf(CL)} переходов на Рекламу
+  (${Math.round(pc(D.clicks.no_game,CL))}%) сделали люди, которые игру не начинали. Лендинг работает
+  и сам по себе — игра усиливает, но не является единственным путём к цели.</p>`;
+
+/* воронка */
+const fmax=D.funnel[0].v, KPIS=[1,6];
+document.getElementById("funnel").append(...D.funnel.map((s,i)=>{
+ const kpiStep=KPIS.includes(i);
+ const d=el("div","fstep"+(kpiStep?" kpi-step":""));
+ const prev=i?D.funnel[i-1].v:null;
+ d.append(el("div","fl",s.label+(kpiStep?`<span class="ftag">${i===1?"KPI старт":"KPI финиш"}</span>`:"")));
+ const tr=el("div","ftrack"), b=el("div","fbar");
+ b.style.width=(s.v/fmax*100).toFixed(2)+"%";
+ b.style.opacity=(1-i*0.075).toFixed(2);
+ tr.append(b); tr.title=s.label+": "+nf(s.v)+" визитов";
+ d.append(tr, el("div","fnum",`${nf(s.v)}<span>${prev?f1(pc(s.v,prev))+"% от пред.":f2(pc(s.v,V))+"% от визитов"}</span>`));
+ return d;}));
+
+/* сравнение */
+document.getElementById("split").innerHTML=
+ `<div class="scard win"><div class="st">Начали игру → перешли на Рекламу</div>
+   <div class="sv">${f1(crGame)}%</div>
+   <div class="gauge"><i style="width:${crGame}%"></i></div>
+   <div class="sn">${nf(D.clicks.after_game)} переходов из ${nf(GS)} визитов</div></div>
+  <div class="scard"><div class="st">Не начинали игру → перешли на Рекламу</div>
+   <div class="sv">${f2(crRest)}%</div>
+   <div class="gauge"><i style="width:${crRest}%"></i></div>
+   <div class="sn">${nf(D.clicks.no_game)} переходов из ${nf(V-GS)} визитов</div></div>
+  <div class="scard"><div class="st">Из переходов: интерес / намерение</div>
+   <div class="sv">${nf(D.clicks.interest)} <span style="color:var(--faint);font-size:22px">/</span> ${nf(D.clicks.intent)}</div>
+   <div class="gauge"><i style="width:${pc(D.clicks.intent,D.clicks.interest+D.clicks.intent)}%"></i></div>
+   <div class="sn">страница продукта / личный кабинет</div></div>`;
+
+/* спарклайны */
+function spark(vals,dates){
+ const w=280,h=74,mx=Math.max(...vals),mn=0;
+ const X=i=>i/(vals.length-1)*w, Y=v=>h-(v-mn)/(mx-mn||1)*h;
+ const pts=vals.map((v,i)=>[X(i),Y(v)]);
+ const line=pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1)).join(" ");
+ const area=line+` L ${w} ${h} L 0 ${h} Z`;
+ const dots=pts.map((p,i)=>`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="${i===pts.length-1?4:2.5}"
+   fill="${i===pts.length-1?"var(--accent)":"var(--surface)"}" stroke="var(--accent)" stroke-width="2">
+   <title>${dates[i]}: ${nf(vals[i])}</title></circle>`).join("");
+ return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img">
+   <line x1="0" y1="${h}" x2="${w}" y2="${h}" stroke="var(--hair)" stroke-width="1"/>
+   <path d="${area}" fill="var(--accent-soft)"/>
+   <path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2"
+     stroke-linejoin="round" stroke-linecap="round"/>${dots}</svg>`;
+}
+const dts=D.days.map(d=>d.d.slice(8)+"."+d.d.slice(5,7));
+const sparkDefs=[
+ {t:"Визиты",k:"visits",d:"в день, всего "+nf(V)},
+ {t:"Начали игру",k:"start",d:"в день, всего "+nf(GS)},
+ {t:"Переходы на Рекламу",k:"clicks",d:"в день, всего "+nf(CL)}];
+document.getElementById("sparks").innerHTML=sparkDefs.map(s=>{
+ const vals=D.days.map(x=>x[s.k]), first=vals[0], last=vals[vals.length-1];
+ const dlt=first?Math.round((last-first)/first*100):0;
+ return `<div class="sp"><div class="spt">${s.t}</div>
+  <div class="spv">${nf(last)}</div>
+  <div class="spd">${s.d} · за период ${dlt>=0?"+":""}${dlt}%</div>${spark(vals,dts)}</div>`;}).join("");
+
+/* таблицы */
+const PILL={strong:["p-strong","сильный"],mid:["p-mid","средний"],weak:["p-weak","слабый"],
+ waste:["p-waste","мусор"],anomaly:["p-anomaly","аномалия"],test:["p-test","тест"]};
+function table(id,rows,firstCol){
+ const mx=Math.max(...rows.map(r=>r.visits));
+ const t=document.getElementById(id);
+ t.innerHTML=`<thead><tr><th>${firstCol}</th><th>Визиты</th><th>Отказы</th><th>Время</th>
+  <th>Дошли</th><th>Вовлечение</th><th>Переходы</th><th>CR</th><th>Оценка</th></tr></thead>
+  <tbody>${rows.map(r=>{const p=PILL[r.v]||PILL.weak;return `<tr>
+   <td class="nm">${r.name}</td>
+   <td class="barcell"><i style="width:${(r.visits/mx*100).toFixed(1)}%"></i><b>${nf(r.visits)}</b></td>
+   <td>${Math.round(r.bounce)}%</td><td>${Math.round(r.dur)} с</td>
+   <td>${nf(r.start)}</td><td>${f2(r.engage)}%</td>
+   <td>${nf(r.clicks)}</td><td>${f2(r.cr)}%</td>
+   <td style="text-align:left"><span class="pill ${p[0]}">${p[1]}</span></td></tr>`}).join("")}</tbody>`;
+}
+table("tutm",D.by_utm,"utm_source");
+table("ttraf",D.by_traffic,"Тип трафика");
+
+const cmx=Math.max(...D.campaigns.map(c=>c.visits));
+document.getElementById("tcamp").innerHTML=
+ `<thead><tr><th>Кампания</th><th>Визиты</th><th>Отказы</th><th>Время</th><th>Дошли</th><th>Вовлечение</th></tr></thead>
+  <tbody>${D.campaigns.map(c=>{const e=pc(c.start,c.visits);return `<tr>
+   <td class="nm" style="font-size:12.5px">${c.name}</td>
+   <td class="barcell"><i style="width:${(c.visits/cmx*100).toFixed(1)}%"></i><b>${nf(c.visits)}</b></td>
+   <td>${Math.round(c.bounce)}%</td><td>${Math.round(c.dur)} с</td>
+   <td>${nf(c.start)}</td><td>${f2(e)}%</td></tr>`}).join("")}</tbody>`;
+
+/* ---- сторона Авито Рекламы ---- */
+const C=D.cabinet;
+document.getElementById("cabkpi").append(...[
+ {k:"Доехало визитов",v:nf(C.totals.visits),n:nf(C.totals.users)+" посетителей · "+Math.round(pc(C.totals.visits,CL))+"% от кликов"},
+ {k:"Регистраций кабинета",v:nf(C.totals.regs),n:f2(C.totals.cr)+"% от доехавших",hl:1},
+ {k:"Из пути «намерение»",v:nf(C.intent.regs),n:f2(C.intent.cr)+"% · "+nf(C.intent.visits)+" визитов"},
+ {k:"Из пути «интерес»",v:nf(C.interest.regs),n:f2(C.interest.cr)+"% · "+nf(C.interest.visits)+" визитов"}
+].map(o=>{const e=el("div","kpi"+(o.hl?" hl":""));
+ e.append(el("div","k",o.k),el("div","v",o.v),el("div","n",o.n));return e;}));
+
+const emax=D.e2e[0].v;
+document.getElementById("e2e").append(...D.e2e.map((s,i)=>{
+ const d2=el("div","fstep e2e-step"), prev=i?D.e2e[i-1].v:null;
+ d2.append(el("div","fl",s.l));
+ const tr=el("div","ftrack"), b=el("div","fbar");
+ b.style.width=Math.max(s.v/emax*100,0.35).toFixed(2)+"%";
+ tr.append(b); tr.title=s.l+": "+nf(s.v);
+ d2.append(tr, el("div","fnum",`${nf(s.v)}<span>${prev?f1(pc(s.v,prev))+"% от пред.":"100%"}</span>`));
+ return d2;}));
+
+const gmax=Math.max(...C.groups.map(g=>g.visits));
+document.getElementById("tland").innerHTML=
+ `<thead><tr><th>Тип страницы</th><th>Визиты</th><th>Регистрации</th><th>CR</th><th>Адресов</th></tr></thead>
+  <tbody>${C.groups.map(g=>`<tr>
+   <td class="nm">${g.name}</td>
+   <td class="barcell"><i style="width:${(g.visits/gmax*100).toFixed(1)}%"></i><b>${nf(g.visits)}</b></td>
+   <td>${nf(g.regs)}</td>
+   <td style="color:${g.cr>=10?"var(--good)":g.cr<1?"var(--crit)":"inherit"}">${f2(g.cr)}%</td>
+   <td>${g.urls}</td></tr>`).join("")}</tbody>`;
+
+const wall=C.groups.filter(g=>/Экран входа|Страница продукта/.test(g.name));
+const wv=wall.reduce((a,b)=>a+b.visits,0), wr=wall.reduce((a,b)=>a+b.regs,0);
+document.getElementById("landnote").innerHTML=
+ `<b>${nf(wv)} из ${nf(C.totals.visits)} визитов (${Math.round(pc(wv,C.totals.visits))}%) приземляются
+  на страницу продукта или на экран входа — и дают ${nf(wr)} регистрации.</b> Там, где человек попадает
+  сразу в кабинет или на форму регистрации, конверсия 18–27%. Осторожная оговорка: часть попавших на
+  экран входа — действующие клиенты, они физически не могут «зарегистрироваться», и низкий CR для них
+  нормален. Но объём такой, что проверить маршрутизацию кнопок стоит.`;
+
+const pmax=Math.max(...C.pages.map(p=>p.visits));
+document.getElementById("tpages").innerHTML=
+ `<thead><tr><th>Адрес входа</th><th>Визиты</th><th>Регистрации</th><th>CR</th></tr></thead>
+  <tbody>${C.pages.map(p=>`<tr>
+   <td class="nm" style="font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weight:400">${p.url}</td>
+   <td class="barcell"><i style="width:${(p.visits/pmax*100).toFixed(1)}%"></i><b>${nf(p.visits)}</b></td>
+   <td>${nf(p.regs)}</td><td>${f2(p.cr)}%</td></tr>`).join("")}</tbody>`;
+
+/* рекомендации */
+const U=Object.fromEntries(D.by_utm.map(r=>[r.name,r]));
+const waste=D.by_utm.filter(r=>r.v==="waste");
+const wV=waste.reduce((a,b)=>a+b.visits,0), wC=waste.reduce((a,b)=>a+b.clicks,0);
+const recs=[
+ {m:"проверить",c:"p-anomaly",h:"Разобраться с mts — цифры не сходятся",
+  p:`${nf(U.mts.visits)} визитов, ${nf(U.mts.clicks)} переходов (${f1(U.mts.cr)}% — лучший CR в закупке)
+     и при этом ровно ноль дошедших до первого уровня игры. Такое сочетание не выглядит как обычное
+     поведение людей. До выяснения я бы не считал этот источник успехом и не масштабировал его.`},
+ {m:"отключить",c:"p-waste",h:"Снять soloway и sberseller",
+  p:`${nf(wV)} визитов дали ${nf(wC)} переходов при отказах выше 75% и среднем времени около 10 секунд.
+     Это не аудитория спецпроекта. Бюджет освободится на две недели откруток.`},
+ {m:"перелить",c:"p-mid",h:"Сдвинуть бюджет в сторону avito_pro и телеграм-каналов",
+  p:`avito_pro: ${nf(U.avito_pro.visits)} визитов, вовлечение ${f1(U.avito_pro.engage)}%, CR ${f1(U.avito_pro.cr)}%.
+     telegram: ${nf(U.telegram.visits)} визитов, вовлечение ${f1(U.telegram.engage)}%, CR ${f1(U.telegram.cr)}%.
+     На фоне yandex с его ${f2(U.yandex.cr)}% это несопоставимые по качеству каналы — но объём у них крошечный.`},
+ {m:"починить",c:"p-mid",h:"Поднять заметность игры на первом экране",
+  p:`«Играть» нажимают ${f1(pc(D.funnel[0].v,V))}% визитов, и ещё почти половина из них отваливается,
+     не закончив первый уровень. Это самая дорогая точка потерь во всей воронке — дешевле поправить
+     первый экран, чем докупать трафик.`},
+ {m:"разметить",c:"p-weak",h:"Закрыть дыру с логотипом",
+  p:`Логотип в шапке ведёт на avito.ru/ads, но целью не размечен. Сколько переходов уходит мимо
+     отчёта — сейчас неизвестно. Правится в GTM за один тег.`},
+ {m:"проверить",c:"p-anomaly",h:"Посмотреть, куда ведёт кнопка в личный кабинет",
+  p:`${nf(D.cabinet.groups.filter(g=>/Экран входа/.test(g.name))[0].visits)} визитов приземляются на
+     экран входа и дают 3 регистрации. Там, где человек попадает сразу в кабинет или на форму
+     регистрации, конверсия 18–27%. Часть попавших на вход — действующие клиенты, для них это
+     нормально, но объём такой, что маршрутизацию стоит перепроверить.`},
+ {m:"разметить",c:"p-mid",h:"Пробросить исходный utm_source в исходящие ссылки",
+  p:`Сейчас все ${nf(D.cabinet.totals.regs)} регистраций лежат одной кучей — какой канал их принёс,
+     по данным не восстановить. Если добавить в ссылки на avito.ru/ads исходную метку, на финале
+     можно будет считать стоимость регистрации по каналам, а не в среднем по проекту.`}];
+document.getElementById("recs").innerHTML=recs.map(r=>
+ `<div class="rec"><span class="rmark pill ${r.c}">${r.m}</span>
+   <div><h4>${r.h}</h4><p>${r.p}</p></div></div>`).join("");
+
+document.getElementById("foot").textContent=
+ `Источник: Яндекс.Метрика, счётчик 111451917. Данные за ${D.period.from} – ${D.period.to} ${new Date().getFullYear()} г. `+
+ `Кампания продолжается до ${D.period.full_to}, финальный срез — 1 сентября.`;
+})();
+</script>
